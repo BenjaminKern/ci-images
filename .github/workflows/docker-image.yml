@@ -74,7 +74,7 @@ jobs:
               ARCH=amd64
               TAG=${{ env.IMAGE_TAG }}
               BAZELISK_VERSION=1.25.0
-              GH_VERSION=2.66.1
+              GH_VERSION=2.69.0
               CROSSTOOL_VERSION=1.27.0
               CMAKE_VERSION=4.0.0
 
