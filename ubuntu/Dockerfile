@@ -58,7 +58,7 @@ RUN if [ "$TAG" = "20.04" ]; then apt-get update && DEBIAN_FRONTEND=noninteracti
 RUN : \
   && mkdir /workspace \
   && useradd -c "" -u 1001 -m ${BUILDBOT_NAME} \
-  && echo ${BUILDBOT_NAME} ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/${BUILDBOT_NAME} \
+  && echo ${BUILDBOT_NAME} ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/${BUILDBOT_NAME}
 
 RUN : \
   && curl -Ls https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-${ARCH} -o /usr/local/bin/bazelisk \
