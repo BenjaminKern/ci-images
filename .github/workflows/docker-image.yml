@@ -75,6 +75,8 @@ jobs:
               TAG=${{ env.IMAGE_TAG }}
               BAZELISK_VERSION=1.25.0
               GH_VERSION=2.66.1
+              CROSSTOOL_VERSION=1.27.0
+              CMAKE_VERSION=4.0.0
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
