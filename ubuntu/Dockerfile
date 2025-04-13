@@ -10,13 +10,8 @@ ARG ARCH=amd64
 ARG BUILDBOT_NAME=buildbot
 ARG CROSSTOOL_VERSION=1.27.0
 ARG CMAKE_VERSION=4.0.0
-ARG RUST_VER=1.86.0
+ARG RUST_VERSION=1.86.0
 ARG GO_VERSION=1.24.2
-
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=$RUST_VER
 
 RUN : \
   && apt-get update \
@@ -68,7 +63,6 @@ RUN : \
   && echo ${BUILDBOT_NAME} ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/${BUILDBOT_NAME}
 
 RUN : \
-  && curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --profile minimal --default-toolchain $RUST_VERSION \
   && curl -Ls https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz | tar xfz - -C /usr/local \
   && curl -Ls https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-${ARCH} -o /usr/local/bin/bazelisk \
   && curl -Ls https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz | tar xfz - --strip=1 -C /usr/local \
@@ -84,4 +78,10 @@ RUN : \
   && rm -rf /tmp/crosstool-ng-${CROSSTOOL_VERSION}
 
 USER ${BUILDBOT_NAME}
+
+RUN : \
+  && curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} --target aarch64-apple-darwin
+
+ENV PATH=/usr/local/go/bin:$PATH
+
 WORKDIR /workspace
