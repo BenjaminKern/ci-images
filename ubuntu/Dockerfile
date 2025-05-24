@@ -6,7 +6,7 @@ ARG TAG
 
 ARG BAZELISK_VERSION=1.25.0
 ARG GH_VERSION=2.66.1
-ARG ARCH=amd64
+ARG TARGETARCH
 ARG BUILDBOT_NAME=buildbot
 ARG CROSSTOOL_VERSION=1.27.0
 ARG CMAKE_VERSION=4.0.0
@@ -63,11 +63,13 @@ RUN : \
   && echo ${BUILDBOT_NAME} ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/${BUILDBOT_NAME}
 
 RUN : \
-  && curl -Ls https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz | tar xfz - -C /usr/local \
-  && curl -Ls https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-${ARCH} -o /usr/local/bin/bazelisk \
-  && curl -Ls https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz | tar xfz - --strip=1 -C /usr/local \
-  && curl -Ls https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH}.tar.gz | tar xzf - --strip=1 -C /usr/local \
+  && curl -Ls https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz | tar xfz - -C /usr/local \
+  && curl -Ls https://github.com/bazelbuild/bazelisk/releases/download/v${BAZELISK_VERSION}/bazelisk-linux-${TARGETARCH} -o /usr/local/bin/bazelisk \
+  && curl -Ls https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${TARGETARCH}.tar.gz | tar xzf - --strip=1 -C /usr/local \
   && chmod 755 /usr/local/bin/bazelisk /usr/local/bin/gh
+
+RUN if [ "$TARGETARCH" = "amd64" ]; then curl -Ls https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz | tar xfz - --strip=1 -C /usr/local; fi
+RUN if [ "$TARGETARCH" = "arm64" ]; then curl -Ls https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-aarch64.tar.gz | tar xfz - --strip=1 -C /usr/local; fi
 
 RUN : \
   && curl -Ls http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-${CROSSTOOL_VERSION}.tar.xz | tar xfJ - -C /tmp/ \
