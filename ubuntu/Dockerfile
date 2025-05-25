@@ -51,11 +51,13 @@ RUN : \
   meson \
   ninja-build \
   lzip \
+  libgmp-dev \
   && locale-gen en_US.UTF-8 \
   && update-ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
-RUN if [ "$TAG" = "20.04" ]; then apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y clang-18 lld-18 && rm -rf /var/lib/apt/lists/*; fi
+RUN if [ "$TAG" = "20.04" ]; then apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y clang-18 lld-18 libc++-18-dev && rm -rf /var/lib/apt/lists/*; fi
+RUN if [ "$TAG" = "20.04" ]; then ln -s /usr/bin/ld.lld-18 /usr/bin/ld.lld && ln -s /usr/bin/lld-18 /usr/bin/lld && ln -s /usr/bin/clang-18 /usr/bin/clang && ln -s /usr/bin/clang++-18 /usr/bin/clang++; fi
 
 RUN : \
   && mkdir /workspace \
