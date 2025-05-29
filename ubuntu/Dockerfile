@@ -62,7 +62,9 @@ RUN if [ "$TAG" = "20.04" ]; then ln -s /usr/bin/ld.lld-18 /usr/bin/ld.lld && ln
 RUN : \
   && mkdir /workspace \
   && useradd -c "" -u 1001 -m ${BUILDBOT_NAME} \
-  && echo ${BUILDBOT_NAME} ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/${BUILDBOT_NAME}
+  && echo ${BUILDBOT_NAME} ALL=\(ALL\) NOPASSWD:ALL > /etc/sudoers.d/${BUILDBOT_NAME} \
+  && mkdir -p /usr/local/rust \
+  && chown ${BUILDBOT_NAME}:${BUILDBOT_NAME} /usr/local/rust
 
 RUN : \
   && curl -Ls https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz | tar xfz - -C /usr/local \
@@ -82,6 +84,9 @@ RUN : \
   && rm -rf /tmp/crosstool-ng-${CROSSTOOL_VERSION}
 
 USER ${BUILDBOT_NAME}
+
+ENV RUSTUP_HOME=/usr/local/rust/rustup \
+    CARGO_HOME=/usr/local/rust/cargo
 
 RUN : \
   && curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} --target aarch64-apple-darwin
