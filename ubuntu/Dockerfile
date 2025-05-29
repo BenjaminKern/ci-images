@@ -91,6 +91,6 @@ ENV RUSTUP_HOME=/usr/local/rust/rustup \
 RUN : \
   && curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} --target aarch64-apple-darwin
 
-ENV PATH=/usr/local/go/bin:$PATH
+ENV PATH=/usr/local/go/bin:/usr/local/rust/cargo/bin:$PATH
 
 WORKDIR /workspace
