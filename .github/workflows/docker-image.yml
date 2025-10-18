@@ -76,12 +76,12 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
               TAG=${{ env.IMAGE_TAG }}
-              BAZELISK_VERSION=1.26.0
-              GH_VERSION=2.73.0
-              CROSSTOOL_VERSION=1.27.0
+              BAZELISK_VERSION=1.27.0
+              GH_VERSION=2.82.0
+              CROSSTOOL_VERSION=1.28.0
               CMAKE_VERSION=4.0.2
-              RUST_VER=1.87.0
-              GO_VERSION=1.24.3
+              RUST_VER=1.90.0
+              GO_VERSION=1.25.3
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
