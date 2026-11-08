@@ -4,14 +4,15 @@ FROM ubuntu:${TAG}
 
 ARG TAG
 
-ARG BAZELISK_VERSION=1.25.0
-ARG GH_VERSION=2.66.1
+ARG BAZELISK_VERSION=1.30.0
+ARG GH_VERSION=2.103.3
 ARG TARGETARCH
 ARG BUILDBOT_NAME=buildbot
-ARG CROSSTOOL_VERSION=1.28.0
-ARG CMAKE_VERSION=4.3.4
-ARG RUST_VERSION=1.96.0
-ARG GO_VERSION=1.26.4
+ARG CROSSTOOL_VERSION=1.29.0
+ARG CMAKE_VERSION=4.4.5
+ARG RUST_VERSION=1.99.1
+ARG GO_VERSION=1.27.3
+ARG ZIG_VERSION=0.17.0
 
 RUN : \
   && apt-get update \
@@ -52,6 +53,9 @@ RUN : \
   ninja-build \
   lzip \
   libgmp-dev \
+  && if grep -q '^mozilla/emSign_ECC_Root_CA_-_G3\.crt$' /etc/ca-certificates.conf; then sed -i 's|^mozilla/emSign_ECC_Root_CA_-_G3\.crt$|!mozilla/emSign_ECC_Root_CA_-_G3.crt|' /etc/ca-certificates.conf; fi \
+  && update-ca-certificates --fresh \
+  && if find /etc/ssl/certs -type l -lname '*emSign_ECC_Root_CA_-_G3.crt' | grep -q .; then echo 'Compromised emSign ECC Root CA - G3 remains trusted' >&2; exit 1; fi \
   && locale-gen en_US.UTF-8 \
   && update-ca-certificates \
   && rm -rf /var/lib/apt/lists/*
@@ -75,6 +79,15 @@ RUN : \
 RUN if [ "$TARGETARCH" = "amd64" ]; then curl -Ls https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz | tar xfz - --strip=1 -C /usr/local; fi
 RUN if [ "$TARGETARCH" = "arm64" ]; then curl -Ls https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-aarch64.tar.gz | tar xfz - --strip=1 -C /usr/local; fi
 
+RUN case "$TARGETARCH" in \
+      amd64) ZIG_ARCH=x86_64 ;; \
+      arm64) ZIG_ARCH=aarch64 ;; \
+      *) echo "Unsupported TARGETARCH for Zig: $TARGETARCH" >&2; exit 1 ;; \
+    esac \
+  && mkdir -p /usr/local/zig \
+  && curl -fLs "https://ziglang.org/download/${ZIG_VERSION}/zig-${ZIG_ARCH}-linux-${ZIG_VERSION}.tar.xz" \
+    | tar xJf - --strip-components=1 -C /usr/local/zig
+
 RUN : \
   && curl -Ls http://crosstool-ng.org/download/crosstool-ng/crosstool-ng-${CROSSTOOL_VERSION}.tar.xz | tar xfJ - -C /tmp/ \
   && cd /tmp/crosstool-ng-${CROSSTOOL_VERSION} \
@@ -91,6 +104,6 @@ ENV RUSTUP_HOME=/usr/local/rust/rustup \
 RUN : \
   && curl https://sh.rustup.rs -sSf | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION} --target aarch64-apple-darwin
 
-ENV PATH=/usr/local/go/bin:/usr/local/rust/cargo/bin:$PATH
+ENV PATH=/usr/local/go/bin:/usr/local/zig:/usr/local/rust/cargo/bin:$PATH
 
 WORKDIR /workspace
